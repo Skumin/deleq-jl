@@ -77,6 +77,7 @@ function run_deleq(fun, boxbounds, cr, fParam, maxgen, NP, showProgress, Emat, c
         pbest_ind = mat[pbest[1], :]
         pbest_val = fun(pbest_ind, args...)
         newmat = mutate(mat, boxbounds, fParam)
+        newmat = crossover(mat, newmat, cr)
         funvals1 = vec(mapslices(x -> fun(x, args...), newmat, dims = 2))
         inds = funvals1 .> funvals
         mat[inds, :] = newmat[inds, :]
