@@ -21,6 +21,32 @@ function gen_init_pop_simple(NP, boxbounds)
     return xi
 end
 
+function gen_init_pop(NP, boxbounds)
+    dm = size(boxbounds)[1]
+    xi = zeros(Float64, NP, dm)
+    for i = 1:NP
+        boundsok = false
+        while !boundsok
+            num = zeros(Float64, 1, dm)
+			for j = 1:dm
+				num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
+			end
+			num = num./sum(num)
+			ids = falses(dm)
+			for j = 1:dm
+				if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
+					ids[j] = true
+				end
+			end
+			if all(ids)
+				xi[i, :] = num
+				boundsok = true
+			end
+        end
+    end
+    return xi
+end
+
 function mutate(mat, boxbounds, fParam)
     sz = size(mat)
     newmat = Array{Float64}(undef, sz)
@@ -65,7 +91,7 @@ end
 
 function run_deleq(fun, boxbounds, cr, fParam, maxgen, NP, showProgress, Emat, constr, args...)
     gen = 1
-    mat = gen_init_pop_simple(NP, boxbounds)
+    mat = gen_init_pop(NP, boxbounds)
     funvals = vec(mapslices(x -> fun(x, args...), mat, dims = 2))
     rbest = argmax(funvals)
     trugen = maxgen
@@ -106,5 +132,5 @@ function run_deleq(fun, boxbounds, cr, fParam, maxgen, NP, showProgress, Emat, c
             println(string("** Value = ", funvals[rbest[1]]))
         end
     end
-    return mat[rbest[1], :], fun(mat[rbest[1], :], args...)
+    return mat[rbest[1], :], fun(mat[rbest[1], :], args...), trugen
 end
