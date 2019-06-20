@@ -28,20 +28,20 @@ function gen_init_pop(NP, boxbounds)
         boundsok = false
         while !boundsok
             num = zeros(Float64, 1, dm)
-			for j = 1:dm
-				num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
-			end
-			num = num./sum(num)
-			ids = falses(dm)
-			for j = 1:dm
-				if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
-					ids[j] = true
-				end
-			end
-			if all(ids)
-				xi[i, :] = num
-				boundsok = true
-			end
+	    for j = 1:dm
+	        num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
+	    end
+	    num = num./sum(num)
+	    ids = falses(dm)
+	    for j = 1:dm
+	        if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
+		    ids[j] = true
+	        end
+	    end
+	    if all(ids)
+	        xi[i, :] = num
+	        boundsok = true
+	    end
         end
     end
     return xi
