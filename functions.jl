@@ -5,7 +5,7 @@ function gen_init_pop_simple(NP, boxbounds)
         boundsok = false
         while !boundsok
             num = rand(dm)
-            num = num./sum(num)
+            num = num ./ sum(num)
             ids = falses(dm)
             for j = 1:dm
                 if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
@@ -31,7 +31,7 @@ function gen_init_pop(NP, boxbounds)
 		    for j = 1:dm
 		        num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
 		    end
-		    num = num./sum(num)
+		    num = num ./ sum(num)
 		    ids = falses(dm)
 		    for j = 1:dm
 		        if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
@@ -82,7 +82,7 @@ function project_population(mat, Emat, constr)
     for i = 1:sz[1]
         num = mat[i, :]
         z = Emat * num - constr
-        u = inv(Mmat) * z
+        u = Mmat \ z
         v = transpose(Emat) * u
         projmat[i, :] = num - v
     end
@@ -102,7 +102,7 @@ function gen_init_pop_adv(NP, boxbounds, Emat, constr)
 		    for j = 1:dm
 		        d[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
 		    end
-			d = d./sum(d)
+			d = d ./ sum(d)
 			z = Emat * d
 			u = Mmat \ z
 			v = transpose(Emat) * u
