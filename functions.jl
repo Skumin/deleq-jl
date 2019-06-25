@@ -28,20 +28,20 @@ function gen_init_pop(NP, boxbounds)
         boundsok = false
         while !boundsok
             num = zeros(Float64, 1, dm)
-	    for j = 1:dm
-	        num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
-	    end
-	    num = num./sum(num)
-	    ids = falses(dm)
-	    for j = 1:dm
-	        if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
-		    ids[j] = true
-	        end
-	    end
-	    if all(ids)
-	        xi[i, :] = num
-	        boundsok = true
-	    end
+		    for j = 1:dm
+		        num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
+		    end
+		    num = num./sum(num)
+		    ids = falses(dm)
+		    for j = 1:dm
+		        if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
+			    	ids[j] = true
+		        end
+		    end
+		    if all(ids)
+		        xi[i, :] = num
+		        boundsok = true
+		    end
         end
     end
     return xi
@@ -89,9 +89,42 @@ function project_population(mat, Emat, constr)
     return projmat
 end
 
+function gen_init_pop_adv(NP, boxbounds, Emat, constr)
+    dm = size(boxbounds)[1]
+    xi = zeros(Float64, NP, dm)
+    Mmat = Emat * transpose(Emat)
+    y = Mmat \ constr
+    x0 = transpose(Emat) * y
+    for i = 1:NP
+        boundsok = false
+        while !boundsok
+			d = zeros(Float64, dm, 1)
+		    for j = 1:dm
+		        d[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
+		    end
+			d = d./sum(d)
+			z = Emat * d
+			u = Mmat \ z
+			v = transpose(Emat) * u
+			num = x0 + d - v
+			ids = falses(dm)
+		    for j = 1:dm
+		        if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
+			    	ids[j] = true
+		        end
+		    end
+		    if all(ids)
+		        xi[i, :] = num
+		        boundsok = true
+		    end
+		end
+	end
+	return xi
+end
+
 function run_deleq(fun, boxbounds, cr, fParam, maxgen, NP, showProgress, Emat, constr, args...)
     gen = 1
-    mat = gen_init_pop(NP, boxbounds)
+    mat = gen_init_pop_adv(NP, boxbounds, Emat, constr)
     funvals = vec(mapslices(x -> fun(x, args...), mat, dims = 2))
     rbest = argmax(funvals)
     trugen = maxgen
