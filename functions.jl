@@ -28,20 +28,20 @@ function gen_init_pop(NP, boxbounds)
         boundsok = false
         while !boundsok
             num = zeros(Float64, 1, dm)
-		    for j = 1:dm
-		        num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
-		    end
-		    num = num ./ sum(num)
-		    ids = falses(dm)
-		    for j = 1:dm
-		        if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
-			    	ids[j] = true
-		        end
-		    end
-		    if all(ids)
-		        xi[i, :] = num
-		        boundsok = true
-		    end
+			for j = 1:dm
+				num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
+			end
+			num = num ./ sum(num)
+			ids = falses(dm)
+			for j = 1:dm
+				if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
+					ids[j] = true
+				end
+			end
+			if all(ids)
+				xi[i, :] = num
+				boundsok = true
+			end
         end
     end
     return xi
@@ -94,7 +94,11 @@ function gen_init_pop_adv(NP, boxbounds, Emat, constr)
     xi = zeros(Float64, NP, dm)
     Mmat = Emat * transpose(Emat)
     y = Mmat \ constr
-    x0 = transpose(Emat) * y
+	if length(y) == 1
+		x0 = transpose(Emat) .* y
+	else
+		x0 = transpose(Emat) * y
+	end
     for i = 1:NP
         boundsok = false
         while !boundsok
