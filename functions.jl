@@ -146,7 +146,7 @@ function run_deleq(fun, boxbounds, cr, fParam, maxgen, NP, showProgress, Emat, c
         mat[inds, :] = newmat[inds, :]
         funvals[inds] = funvals1[inds]
         rbest = argmax(funvals)
-        if any(Emat * mat[rbest[1], :] .!= transpose(constr))
+        if any([!isapprox((Emat * mat[rbest[1], :])[i], constr[i]) for i in 1:length(constr)])
             if showProgress
                 println("* Unfeasible, projecting back.")
             end
