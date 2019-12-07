@@ -1,3 +1,5 @@
+using Distributions, Random
+
 function gen_init_pop_simple(NP, boxbounds)
     dm = size(boxbounds)[1]
     xi = zeros(Float64, NP, dm)
@@ -29,7 +31,7 @@ function gen_init_pop(NP, boxbounds)
         while !boundsok
             num = zeros(Float64, 1, dm)
 			for j = 1:dm
-				num[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
+				num[j] = rand(Uniform(boxbounds[j, 1], boxbound[j, 2]))
 			end
 			num = num ./ sum(num)
 			ids = falses(dm)
@@ -104,7 +106,7 @@ function gen_init_pop_adv(NP, boxbounds, Emat, constr)
         while !boundsok
 			d = zeros(Float64, dm, 1)
 		    for j = 1:dm
-		        d[j] = rand() * (boxbounds[j, 2] - boxbounds[j, 1]) + boxbounds[j, 1]
+		        d[j] = rand(Uniform(boxbounds[j, 1], boxbound[j, 2]))
 		    end
 			d = d ./ sum(d)
 			z = Emat * d
