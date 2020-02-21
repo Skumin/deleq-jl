@@ -49,7 +49,7 @@ function gen_init_pop(NP, boxbounds)
     return xi
 end
 
-function mutate(mat, boxbounds, fParam)
+function mutate_rand(mat, boxbounds, fParam)
     sz = size(mat);
     newmat = Array{Float64}(undef, sz);
     sqn = collect(1:sz[1]);
@@ -58,6 +58,30 @@ function mutate(mat, boxbounds, fParam)
         while !boundsok
             rs = rand(sqn[1:end .!= i], 3);
             num = mat[rs[1], :] + fParam * (mat[rs[2], :] - mat[rs[3], :]);
+            ids = falses(sz[2]);
+            for j = 1:sz[2]
+                if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
+                    ids[j] = true;
+                end
+            end
+            if all(ids)
+                newmat[i, :] = num;
+                boundsok = true;
+            end
+        end
+    end
+    return newmat
+end
+
+function mutate_best(mat, bestind, boxbounds, fParam)
+    sz = size(mat);
+    newmat = Array{Float64}(undef, sz);
+    sqn = collect(1:sz[1]);
+    for i = 1:sz[1]
+        boundsok = false;
+        while !boundsok
+            rs = rand(sqn[setdiff(sqn, [i, bestind])], 2);
+            num = mat[bestind, :] + fParam * (mat[rs[1], :] - mat[rs[2], :]);
             ids = falses(sz[2]);
             for j = 1:sz[2]
                 if num[j] >= boxbounds[j, 1] && num[j] <= boxbounds[j, 2]
@@ -128,27 +152,39 @@ function gen_init_pop_adv(NP, boxbounds, Emat, constr)
 	return xi
 end
 
-function run_deleq(fun, boxbounds, cr, fParam, maxgen, NP, showProgress, Emat, constr, args...)
+function run_deleq(fun, boxbounds, mutateType, cr, fParam, maxgen, NP, showProgress, Emat, constr, args...)
     gen = 1;
     mat = gen_init_pop_adv(NP, boxbounds, Emat, constr);
-    funvals = vec(mapslices(x -> fun(x, args...), mat, dims = 2));
+    
+	funvals = vec(mapslices(x -> fun(x, args...), mat, dims = 2));
     rbest = argmax(funvals);
-    trugen = maxgen;
+    
+	trugen = maxgen;
     while gen <= trugen
         if showProgress
             println(string("Generation ", gen));
         end
-        pbest = rbest;
+        
+		pbest = rbest;
         pbest_ind = mat[pbest[1], :];
         pbest_val = fun(pbest_ind, args...);
-        newmat = mutate(mat, boxbounds, fParam);
+		
+		if mutateType == "rand"
+			newmat = mutate_rand(mat, boxbounds, fParam);
+		elseif mutateType == "best"
+			newmat = mutate_best(mat, pbest[1], boxbounds, fParam);
+		end
+		
         newmat = crossover(mat, newmat, cr);
-        funvals1 = vec(mapslices(x -> fun(x, args...), newmat, dims = 2));
+        
+		funvals1 = vec(mapslices(x -> fun(x, args...), newmat, dims = 2));
         inds = funvals1 .> funvals;
         mat[inds, :] = newmat[inds, :];
-        funvals[inds] = funvals1[inds];
+        
+		funvals[inds] = funvals1[inds];
         rbest = argmax(funvals);
-        if any([!isapprox((Emat * mat[rbest[1], :])[i], constr[i]) for i in 1:length(constr)])
+        
+		if any([!isapprox((Emat * mat[rbest[1], :])[i], constr[i]) for i in 1:length(constr)])
             if showProgress
                 println("* Unfeasible, projecting back.");
             end
