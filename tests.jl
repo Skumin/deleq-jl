@@ -16,4 +16,4 @@ constr = [0];
 NP = 50;
 maxgen = 200;
 
-@benchmark run_deleq(rastrigin_minus, $boxbounds, "best", 0.7, 0.9, $maxgen, $NP, false, $Emat, $constr)
+@benchmark run_deleq(rastrigin_minus, $boxbounds, 1, 0.7, 0.9, $maxgen, $NP, false, $Emat, $constr)
