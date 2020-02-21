@@ -152,7 +152,7 @@ function gen_init_pop_adv(NP, boxbounds, Emat, constr)
 	return xi
 end
 
-function run_deleq(fun, boxbounds, mutateType, cr, fParam, maxgen, NP, showProgress, Emat, constr, args...)
+function run_deleq(fun::Function, boxbounds, mutateType, cr, fParam, maxgen, NP, showProgress, Emat, constr, args...)
     gen = 1;
     mat = gen_init_pop_adv(NP, boxbounds, Emat, constr);
     
@@ -169,9 +169,9 @@ function run_deleq(fun, boxbounds, mutateType, cr, fParam, maxgen, NP, showProgr
         pbest_ind = mat[pbest[1], :];
         pbest_val = fun(pbest_ind, args...);
 		
-		if mutateType == "rand"
+		if mutateType == 1
 			newmat = mutate_rand(mat, boxbounds, fParam);
-		elseif mutateType == "best"
+		elseif mutateType == 2
 			newmat = mutate_best(mat, pbest[1], boxbounds, fParam);
 		end
 		
