@@ -1,6 +1,6 @@
-using Distributions, Random
+using Distributions, ArgCheck
 
-function gen_init_pop_simple(NP, boxbounds)
+function gen_init_pop_simple(NP::Int, boxbounds)
     dm = size(boxbounds)[1];
     xi = zeros(Float64, NP, dm);
     for i = 1:NP
@@ -23,7 +23,7 @@ function gen_init_pop_simple(NP, boxbounds)
     return xi
 end
 
-function gen_init_pop(NP, boxbounds)
+function gen_init_pop(NP::Int, boxbounds)
     dm = size(boxbounds)[1];
     xi = zeros(Float64, NP, dm);
     for i = 1:NP
@@ -115,7 +115,7 @@ function project_population(mat, Emat, constr)
     return projmat
 end
 
-function gen_init_pop_adv(NP, boxbounds, Emat, constr)
+function gen_init_pop_adv(NP::Int, boxbounds, Emat, constr)
     dm = size(boxbounds)[1];
     xi = zeros(Float64, NP, dm);
     Mmat = Emat * transpose(Emat);
@@ -152,8 +152,14 @@ function gen_init_pop_adv(NP, boxbounds, Emat, constr)
 	return xi
 end
 
-function run_deleq(fun::Function, boxbounds, mutateType, cr, fParam, maxgen, NP, showProgress, Emat, constr, args...)
-    gen = 1;
+function run_deleq(fun::Function, boxbounds, mutateType::Int, cr, fParam, maxgen::Int, NP::Int, showProgress::Bool, Emat, constr, args...)
+    @argcheck in(mutateType, [1, 2])
+	@argcheck cr >= 0 && cr <= 1
+	@argcheck fParam >= 0 && fParam <= 1
+	@argcheck maxgen > 0
+	@argcheck NP > 0
+	
+	gen = 1;
     mat = gen_init_pop_adv(NP, boxbounds, Emat, constr);
     
 	funvals = vec(mapslices(x -> fun(x, args...), mat, dims = 2));

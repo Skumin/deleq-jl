@@ -15,5 +15,6 @@ Emat = [1 1];
 constr = [0];
 NP = 50;
 maxgen = 200;
+mutate_type = 1;
 
-@benchmark run_deleq(rastrigin_minus, $boxbounds, 1, 0.7, 0.9, $maxgen, $NP, false, $Emat, $constr)
+@benchmark run_deleq(rastrigin_minus, $boxbounds, mutate_type, 0.7, 0.9, $maxgen, $NP, false, $Emat, $constr)
